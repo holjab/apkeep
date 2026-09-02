@@ -62,6 +62,15 @@ pub fn app() -> Command {
                 .default_value("1"),
         )
         .arg(
+            Arg::new("version_code")
+                .help("Version code of the app. Can be used when downloading from google-play only.")
+                .short('n')
+                .long("version-code")
+                .action(ArgAction::Set)
+                .value_parser(value_parser!(u64))
+                .required(false),
+        )
+        .arg(
             Arg::new("version_field")
                 .help("CSV field containing versions (used only if CSV is specified)")
                 .short('v')

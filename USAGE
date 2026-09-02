@@ -12,6 +12,8 @@ Options:
           CSV file to use
   -f, --field <field>
           CSV field containing app IDs (used only if CSV is specified) [default: 1]
+  -n, --version-code <version_code>
+          Version code of the app. Can be used when downloading from google-play only.
   -v, --version-field <version_field>
           CSV field containing versions (used only if CSV is specified)
   -l, --list-versions

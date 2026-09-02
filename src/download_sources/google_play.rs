@@ -12,6 +12,7 @@ use crate::util::progress_bar::progress_wrapper;
 
 pub async fn download_apps(
     apps: Vec<(String, Option<String>)>,
+    version_code: u64,
     parallel: usize,
     sleep_duration: u64,
     email: &str,
@@ -96,7 +97,13 @@ pub async fn download_apps(
                     if sleep_duration > 0 {
                         sleep(TokioDuration::from_millis(sleep_duration)).await;
                     }
-                    match gpa.download(&app_id, None, split_apk, include_dex_metadata, include_additional_files, Path::new(outpath), Some(&progress_wrapper(mp_dl1))).await {
+
+                    let mut version_option = Some(version_code as i64);
+                    if version_code == 0 {
+                        version_option = None
+                    }
+
+                    match gpa.download(&app_id, version_option, split_apk, include_dex_metadata, include_additional_files, Path::new(outpath), Some(&progress_wrapper(mp_dl1))).await {
                         Ok(_) => mp_log.suspend(|| println!("{} downloaded successfully!", app_id)),
                         Err(err) if matches!(err.kind(), GpapiErrorKind::FileExists) => {
                             mp_log.println(format!("File already exists for {}. Skipping...", app_id)).unwrap();
@@ -112,11 +119,11 @@ pub async fn download_apps(
                         }
                         Err(_) => {
                             mp_log.println(format!("An error has occurred attempting to download {}.  Retry #1...", app_id)).unwrap();
-                            match gpa.download(&app_id, None, split_apk, include_dex_metadata, include_additional_files, Path::new(outpath), Some(&progress_wrapper(mp_dl2))).await {
+                            match gpa.download(&app_id, version_option, split_apk, include_dex_metadata, include_additional_files, Path::new(outpath), Some(&progress_wrapper(mp_dl2))).await {
                                 Ok(_) => mp_log.suspend(|| println!("{} downloaded successfully!", app_id)),
                                 Err(_) => {
                                     mp_log.println(format!("An error has occurred attempting to download {}.  Retry #2...", app_id)).unwrap();
-                                    match gpa.download(&app_id, None, split_apk, include_dex_metadata, include_additional_files, Path::new(outpath), Some(&progress_wrapper(mp_dl3))).await {
+                                    match gpa.download(&app_id, version_option, split_apk, include_dex_metadata, include_additional_files, Path::new(outpath), Some(&progress_wrapper(mp_dl3))).await {
                                         Ok(_) => mp_log.suspend(|| println!("{} downloaded successfully!", app_id)),
                                         Err(_) => {
                                             mp_log.println(format!("An error has occurred attempting to download {}. Skipping...", app_id)).unwrap();
