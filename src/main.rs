@@ -313,6 +313,10 @@ async fn main() {
             }
             DownloadSource::GooglePlay => {
                 let mut email = matches.get_one::<String>("google_email").map(|v| v.to_string());
+                let mut version_code: u64 = 0;
+                if let Some(&version_code_value) = matches.get_one::<u64>("version_code") {
+                    version_code = version_code_value;
+                }
 
                 if email.is_some() && oauth_token.is_some() {
                     google_play::request_aas_token(
@@ -378,6 +382,7 @@ async fn main() {
 
                     google_play::download_apps(
                         list,
+                        version_code,
                         parallel,
                         sleep_duration,
                         &email.unwrap(),
